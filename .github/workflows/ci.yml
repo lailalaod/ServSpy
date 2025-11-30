@@ -7,7 +7,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -15,11 +14,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
 
     - name: Install C dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
@@ -41,27 +35,33 @@ jobs:
         make test
 
   lint:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install linting tools
-      run: |
-        pip install black flake8 mypy
+      - name: Install linting tools
+        run: |
+          pip install black flake8 mypy
 
-    - name: Check Python code formatting
-      run: |
-        black --check src/python/ tests/
+      - name: Check Python code formatting
+        run: |
+          black --check src/python/ tests/
 
-    - name: Run Python linter
-      run: |
-        flake8 src/python/ tests/
+      - name: Run Python linter
+        run: |
+          flake8 src/python/ tests/
 
-    - name: Run Python type checking
-      run: |
-        mypy src/python/
+      - name: Run Python type checking
+        run: |
+          mypy src/python/
 
